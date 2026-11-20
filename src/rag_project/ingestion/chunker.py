@@ -183,8 +183,141 @@ def _split_section_into_blocks(text: str) -> list[str]:
     return blocks
 
 
-def _split_oversized_block(block: str, max_tokens: int) -> list[str]:
-    """Split an individual block that alone exceeds max_tokens."""
+def _is_code_block(block: str) -> bool:
+    """Return True if block is a complete fenced code block."""
+    lines = block.strip().splitlines()
+    if len(lines) < 2:
+        return False
+    first = lines[0].strip()
+    last = lines[-1].strip()
+    return (first.startswith(("```", "~~~"))) and (
+        last == first[:3] or last == "```" or last == "~~~"
+    )
+
+
+def _parse_fence_header(block: str) -> tuple[str, str, str]:
+    """Parse a fenced code block into (fence_open_line, inner_lines_text, fence_close_line).
+
+    fence_open_line is e.g. '```python', inner_lines_text is everything between, fence_close_line is '```'.
+    """
+    lines = block.splitlines()
+    fence_open = lines[0]
+    fence_close = lines[-1]
+    inner = "\n".join(lines[1:-1])
+    return fence_open, inner, fence_close
+
+
+def _is_safe_split_point(line: str) -> bool:
+    """Return True if this line is a safe place to split a code block.
+
+    Safe points are blank lines or lines that start at column 0 (def, class, @, etc.)
+    without leading whitespace — i.e., top-level Python statements.
+    """
+    if line == "" or line.strip() == "":
+        return True
+    # starts at column 0 (no leading whitespace) — top-level statement
+    return len(line) > 0 and not line[0].isspace()
+
+
+def _split_oversized_code_block(block: str, max_tokens: int, min_tokens: int) -> list[str]:
+    """Split a fenced code block that exceeds max_tokens into balanced, self-contained pieces.
+
+    Each piece is a complete fenced code block (open fence ... close fence).
+    Splits happen only at blank lines or column-0 lines (def, class, @, etc.).
+    Fence overhead tokens are counted toward max_tokens.
+    Tail pieces below min_tokens are merged into the previous piece when they fit.
+    """
+    fence_open, inner, fence_close = _parse_fence_header(block)
+    lang = fence_open.strip()[3:].strip()  # e.g. "python" from "```python"
+    continuation_open = f"```{lang}" if lang else "```"
+
+    # Token overhead per piece: open_fence\n...\nclose_fence — count the wrapper tokens
+    wrapper_tokens = count_tokens(f"{fence_open}\n{fence_close}")
+    content_budget = max_tokens - wrapper_tokens
+    if content_budget <= 0:
+        # pathological case: fence alone exceeds budget; return as-is
+        return [block]
+
+    inner_lines = inner.splitlines()
+    pieces: list[str] = []
+    current_inner_lines: list[str] = []
+
+    def _build_piece(inner_lines_list: list[str]) -> str:
+        inner_text = "\n".join(inner_lines_list)
+        return f"{fence_open}\n{inner_text}\n{fence_close}"
+
+    def _build_continuation_piece(inner_lines_list: list[str]) -> str:
+        inner_text = "\n".join(inner_lines_list)
+        return f"{continuation_open}\n{inner_text}\n{fence_close}"
+
+    def _piece_fits(inner_lines_list: list[str], is_first: bool) -> bool:
+        p = _build_piece(inner_lines_list) if is_first else _build_continuation_piece(inner_lines_list)
+        return count_tokens(p) <= max_tokens
+
+    is_first_piece = True
+
+    for idx, line in enumerate(inner_lines):
+        candidate_lines = current_inner_lines + [line]
+
+        if _piece_fits(candidate_lines, is_first_piece):
+            current_inner_lines.append(line)
+        else:
+            # Need to cut before this line. Find last safe split point.
+            if current_inner_lines:
+                # Find the latest safe split point within current_inner_lines
+                split_at = len(current_inner_lines)  # default: cut before current line
+                for back in range(len(current_inner_lines) - 1, 0, -1):
+                    if _is_safe_split_point(current_inner_lines[back]):
+                        split_at = back
+                        break
+
+                # If no safe split found, still cut at boundary (line boundary is guaranteed)
+                piece_lines = current_inner_lines[:split_at]
+                remaining_lines = current_inner_lines[split_at:]
+
+                if piece_lines:
+                    piece = _build_piece(piece_lines) if is_first_piece else _build_continuation_piece(piece_lines)
+                    pieces.append(piece)
+                    is_first_piece = False
+                    current_inner_lines = remaining_lines + [line]
+                else:
+                    # Can't split further — just append line and let it overflow
+                    current_inner_lines.append(line)
+            else:
+                current_inner_lines.append(line)
+
+    if current_inner_lines:
+        piece = _build_piece(current_inner_lines) if is_first_piece else _build_continuation_piece(current_inner_lines)
+        pieces.append(piece)
+
+    if not pieces:
+        return [block]
+
+    # Merge tail pieces below min_tokens into previous piece when they fit
+    result: list[str] = []
+    for piece in pieces:
+        if (
+            result
+            and count_tokens(piece) < min_tokens
+            and count_tokens(result[-1] + "\n\n" + piece) <= max_tokens
+        ):
+            result[-1] = result[-1] + "\n\n" + piece
+        else:
+            result.append(piece)
+
+    return result
+
+
+def _split_oversized_block(block: str, max_tokens: int, min_tokens: int = 0) -> list[str]:
+    """Split an individual block that alone exceeds max_tokens.
+
+    For fenced code blocks, splits at safe points (blank lines, column-0 lines like def/class/@)
+    so every sub-piece is a balanced, self-contained fenced code block.
+    For plain text blocks, splits at line boundaries.
+    """
+    if _is_code_block(block):
+        return _split_oversized_code_block(block, max_tokens, min_tokens)
+
     lines = block.splitlines()
     sub_blocks: list[str] = []
     current_lines: list[str] = []
@@ -215,10 +348,10 @@ def _split_oversized_block(block: str, max_tokens: int) -> list[str]:
                             for start_idx in range(0, len(ids), max_tokens):
                                 piece_ids = ids[start_idx : start_idx + max_tokens]
                                 decoded = tokenizer.decode(piece_ids)
-                            if isinstance(decoded, str):
-                                sub_blocks.append(decoded)
-                            else:
-                                sub_blocks.extend(decoded)
+                                if isinstance(decoded, str):
+                                    sub_blocks.append(decoded)
+                                else:
+                                    sub_blocks.extend(decoded)
                         else:
                             current_words.append(word)
                 if current_words:
@@ -232,17 +365,43 @@ def _split_oversized_block(block: str, max_tokens: int) -> list[str]:
     return [sb for sb in sub_blocks if sb.strip()]
 
 
+def _text_starts_inside_fence(text: str) -> bool:
+    """Return True if the given text starts inside a fenced code block.
+
+    A text starts inside a fence if the first ``` or ~~~ line encountered when
+    scanning from the top is a closing fence (i.e., the content began mid-block).
+    We detect this by checking whether the text starts without an opening fence
+    but has content that would only make sense inside a fence.
+
+    Heuristic: scan lines; if we see a bare ``` or ~~~ (3 chars, no language tag)
+    before we see one with a language or before any heading/paragraph, it's a closing fence.
+    """
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith(("```", "~~~")):
+            rest = stripped[3:]
+            # A closing fence is exactly ``` or ~~~ with no extra content
+            return rest == ""
+        if stripped:  # non-empty, non-fence line
+            return False
+    return False
+
+
 def _chunk_blocks(
-    blocks: list[str], max_tokens: int, overlap_tokens: int
+    blocks: list[str], max_tokens: int, overlap_tokens: int, min_tokens: int = 0
 ) -> list[str]:
-    """Group blocks into chunks respecting max_tokens and applying overlap."""
+    """Group blocks into chunks respecting max_tokens and applying overlap.
+
+    Overlap always starts at a line boundary.  If the overlap region would begin
+    inside a fenced code block, the overlap is dropped for that chunk transition.
+    """
     if not blocks:
         return []
 
     normalized_blocks: list[str] = []
     for block in blocks:
         if count_tokens(block) > max_tokens:
-            normalized_blocks.extend(_split_oversized_block(block, max_tokens))
+            normalized_blocks.extend(_split_oversized_block(block, max_tokens, min_tokens))
         else:
             normalized_blocks.append(block)
 
@@ -282,6 +441,13 @@ def _chunk_blocks(
                     next_i = k
                 else:
                     break
+
+            # Validate overlap: must not start inside a fenced code block
+            if overlap_accum:
+                overlap_text = "\n\n".join(overlap_accum)
+                if _text_starts_inside_fence(overlap_text):
+                    overlap_accum = []
+                    next_i = j
 
         if next_i <= i:
             next_i = i + 1

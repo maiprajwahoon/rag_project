@@ -272,3 +272,85 @@ def test_drop_html_comment_and_directive_only_chunks() -> None:
     for i, chunk in enumerate(chunks):
         assert chunk.chunk_index == i
         assert chunk.chunk_id == f"ref.md::{i:04d}"
+
+
+def test_every_chunk_has_balanced_fences() -> None:
+    """Every chunk must contain an even number of ``` fence markers.
+
+    When a large code block is split into sub-pieces, each piece must carry both
+    an opening and a closing fence so it is fully self-contained.
+    """
+    # Build a code block large enough to need splitting: many top-level functions
+    funcs = "\n\n".join(
+        f"def func_{i}():\n    return {i}" for i in range(50)
+    )
+    code = f"```python\n{funcs}\n```"
+    text = f"# Section\n\n{code}"
+    doc = Document(source_path="fences.md", title="Fences", text=text)
+
+    chunks = chunk_documents([doc], max_tokens=80, overlap_tokens=10, min_tokens=20)
+
+    for chunk in chunks:
+        fence_count = chunk.text.count("```")
+        assert fence_count % 2 == 0, (
+            f"Chunk {chunk.chunk_id} has odd fence count {fence_count}:\n{chunk.text!r}"
+        )
+
+
+def test_no_chunk_starts_with_partial_line() -> None:
+    """Every chunk must start at a proper line boundary — never mid-line.
+
+    Specifically: no chunk may begin with leading whitespace that is a continuation
+    of an indented code body (which would indicate the split happened inside a statement).
+    If a chunk starts with ``` it is a valid fence open/close, so that is allowed.
+    """
+    # Indented-only lines force the check: if split mid-block, overlap would re-attach them
+    inner = "\n".join(f"    x_{i} = {i} * 2" for i in range(60))
+    code = f"```python\n{inner}\n```"
+    long_para = "This is a detailed sentence about Python and FastAPI. " * 10
+    text = f"# Guide\n\n{long_para}\n\n{code}\n\n{long_para}"
+    doc = Document(source_path="partial.md", title="Guide", text=text)
+
+    chunks = chunk_documents([doc], max_tokens=100, overlap_tokens=15, min_tokens=20)
+
+    for chunk in chunks:
+        first_line = chunk.text.splitlines()[0]
+        # A chunk starting with pure indented content (not a fence line) is a split artifact
+        is_indented_non_fence = first_line.startswith("    ") and not first_line.strip().startswith("```")
+        assert not is_indented_non_fence, (
+            f"Chunk {chunk.chunk_id} starts with indented non-fence line: {first_line!r}"
+        )
+
+
+def test_large_code_block_splits_into_balanced_chunks() -> None:
+    """A code block of ~1000 tokens must split into several balanced, self-contained chunks.
+
+    Each resulting chunk must:
+    - Have token_count <= max_tokens.
+    - Contain an even number of ``` fence markers (open + close).
+    - Yield more than 3 chunks from the split (so it is genuinely large).
+    """
+    # ~60 functions → roughly 700-900 tokens of code content
+    funcs = "\n\n".join(
+        f"def function_{i}(x, y):\n    result = x * {i} + y\n    return result"
+        for i in range(60)
+    )
+    code_block = f"```python\n{funcs}\n```"
+    doc = Document(
+        source_path="large.md",
+        title="Large Code",
+        text=f"# Large\n\n{code_block}",
+    )
+    max_tokens = 100
+
+    chunks = chunk_documents([doc], max_tokens=max_tokens, overlap_tokens=10, min_tokens=20)
+
+    assert len(chunks) > 3, f"Expected several chunks from large code block, got {len(chunks)}"
+    for chunk in chunks:
+        assert chunk.token_count <= max_tokens, (
+            f"Chunk {chunk.chunk_id} exceeds max_tokens: {chunk.token_count}"
+        )
+        fence_count = chunk.text.count("```")
+        assert fence_count % 2 == 0, (
+            f"Chunk {chunk.chunk_id} has unbalanced fences ({fence_count}):\n{chunk.text!r}"
+        )
