@@ -9,6 +9,40 @@ from transformers import AutoTokenizer, PreTrainedTokenizerBase
 from rag_project.ingestion.models import Chunk, Document
 
 _HEADING_REGEX = re.compile(r"^(#{1,6})\s+(.+?)\s*$")
+_ANCHOR_REGEX = re.compile(r"\s*\{\s*#([^\s}]+)\s*\}\s*$")
+
+
+def _strip_anchor(heading_raw: str) -> tuple[str, str | None]:
+    """Strip trailing { #anchor } from a heading and return (clean_heading, anchor)."""
+    match = _ANCHOR_REGEX.search(heading_raw)
+    if match:
+        anchor = match.group(1)
+        clean = heading_raw[: match.start()].strip()
+        return clean, anchor
+    return heading_raw.strip(), None
+
+
+def _is_html_comment_only(text: str) -> bool:
+    """Check if text after stripping consists exclusively of HTML comment(s)."""
+    stripped = text.strip()
+    if not stripped:
+        return False
+    without_comments = re.sub(r"<!--[\s\S]*?-->", "", stripped).strip()
+    return without_comments == ""
+
+
+def _is_directive_lines_only(text: str) -> bool:
+    """Check if text after stripping consists exclusively of ::: directive lines."""
+    stripped = text.strip()
+    if not stripped:
+        return False
+    lines = [line.strip() for line in stripped.splitlines() if line.strip()]
+    return bool(lines) and all(line.startswith(":::") for line in lines)
+
+
+def _is_dropped_chunk(text: str) -> bool:
+    """Check if chunk text after stripping is only an HTML comment or only ::: directive lines."""
+    return _is_html_comment_only(text) or _is_directive_lines_only(text)
 
 
 @lru_cache(maxsize=1)
@@ -25,19 +59,20 @@ def count_tokens(text: str) -> int:
     return len(tokenizer.encode(text, add_special_tokens=False))
 
 
-def _split_document_by_headings(text: str) -> list[tuple[str, str]]:
+def _split_document_by_headings(text: str) -> list[tuple[str, str | None, str]]:
     """Split markdown text into sections by heading hierarchy.
 
     Fenced code blocks are tracked so `#` lines within code are not mistaken for headings.
 
     Returns:
-        A list of tuples: (heading_path, section_text).
+        A list of tuples: (heading_path, anchor, section_text).
     """
     lines = text.splitlines()
-    sections: list[tuple[str, str]] = []
-    heading_stack: list[tuple[int, str]] = []
+    sections: list[tuple[str, str | None, str]] = []
+    heading_stack: list[tuple[int, str, str | None]] = []
     current_lines: list[str] = []
     current_heading_path = ""
+    current_anchor: str | None = None
     in_code = False
     current_fence = ""
 
@@ -60,16 +95,18 @@ def _split_document_by_headings(text: str) -> list[tuple[str, str]]:
                 # Flush previous section content if non-empty
                 section_content = "\n".join(current_lines).strip()
                 if section_content:
-                    sections.append((current_heading_path, section_content))
+                    sections.append((current_heading_path, current_anchor, section_content))
                 current_lines = []
 
                 # Update heading stack
                 level = len(match.group(1))
-                heading_name = match.group(2).strip()
+                raw_heading_name = match.group(2).strip()
+                clean_heading_name, anchor = _strip_anchor(raw_heading_name)
                 while heading_stack and heading_stack[-1][0] >= level:
                     heading_stack.pop()
-                heading_stack.append((level, heading_name))
+                heading_stack.append((level, clean_heading_name, anchor))
                 current_heading_path = " > ".join(h[1] for h in heading_stack)
+                current_anchor = heading_stack[-1][2] if heading_stack else None
                 continue
 
         current_lines.append(line)
@@ -77,12 +114,13 @@ def _split_document_by_headings(text: str) -> list[tuple[str, str]]:
     # Flush final section content
     section_content = "\n".join(current_lines).strip()
     if section_content:
-        sections.append((current_heading_path, section_content))
+        sections.append((current_heading_path, current_anchor, section_content))
 
     # Fallback if document has text but no non-heading content was captured
     if not sections and text.strip():
         fallback_path = " > ".join(h[1] for h in heading_stack) if heading_stack else ""
-        sections.append((fallback_path, text.strip()))
+        fallback_anchor = heading_stack[-1][2] if heading_stack else None
+        sections.append((fallback_path, fallback_anchor, text.strip()))
 
     return sections
 
@@ -263,18 +301,21 @@ def _is_lone_heading(text: str) -> bool:
 def _postprocess_section_chunks(
     chunks: list[str], max_tokens: int, min_tokens: int
 ) -> list[str]:
-    """Merge chunks below min_tokens into adjacent chunks of the same section, or drop lone headings."""
+    """Merge chunks below min_tokens into adjacent chunks of the same section, or drop lone headings / comments / directives."""
     if not chunks:
         return []
 
+    # Drop lone headings, pure HTML comments, and pure ::: directive lines
     filtered: list[str] = []
     for c in chunks:
+        if _is_dropped_chunk(c):
+            continue
         if count_tokens(c) < min_tokens and _is_lone_heading(c):
             continue
         filtered.append(c)
 
     if len(filtered) <= 1:
-        return filtered
+        return [c for c in filtered if not _is_dropped_chunk(c)]
 
     result = list(filtered)
     idx = 0
@@ -298,7 +339,7 @@ def _postprocess_section_chunks(
 
         idx += 1
 
-    return [c for c in result if c.strip()]
+    return [c for c in result if c.strip() and not _is_dropped_chunk(c)]
 
 
 def chunk_documents(
@@ -314,8 +355,9 @@ def chunk_documents(
     the code block alone exceeds max_tokens. Every chunk is guaranteed to have at most
     max_tokens. Overlap applies only between consecutive chunks of the same section.
     Chunks below min_tokens are merged into adjacent chunks of the same section (or dropped
-    if they are lone headings with no body). Chunk IDs are deterministic and sequentially
-    renumbered after merging as f"{source_path}::{chunk_index:04d}".
+    if they are lone headings with no body). Trailing { #anchor } is stripped from headings
+    and stored in Chunk.anchor. Pure HTML comments and pure ::: directive lines are dropped.
+    Chunk IDs are deterministic and sequentially renumbered as f"{source_path}::{chunk_index:04d}".
 
     Args:
         docs: Sequence of Document models to chunk.
@@ -333,7 +375,7 @@ def chunk_documents(
         sections = _split_document_by_headings(doc.text)
         chunk_index = 0
 
-        for heading_path, section_text in sections:
+        for heading_path, anchor, section_text in sections:
             sec_tokens = count_tokens(section_text)
             if sec_tokens <= max_tokens:
                 raw_chunk_texts = [section_text]
@@ -355,6 +397,7 @@ def chunk_documents(
                         chunk_index=chunk_index,
                         text=text,
                         token_count=token_count,
+                        anchor=anchor,
                     )
                 )
                 chunk_index += 1

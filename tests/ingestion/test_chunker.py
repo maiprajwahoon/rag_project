@@ -1,5 +1,7 @@
 """Tests for markdown chunker."""
 
+import re
+
 from rag_project.ingestion.chunker import chunk_documents, count_tokens
 from rag_project.ingestion.models import Document
 
@@ -200,3 +202,73 @@ def test_all_chunks_are_still_at_most_max_tokens() -> None:
     for chunk in chunks:
         assert chunk.token_count <= max_tokens
         assert count_tokens(chunk.text) <= max_tokens
+
+
+def test_heading_anchor_stripped_and_stored_in_chunk() -> None:
+    """Trailing { #anchor } must be stripped from heading_path and stored in Chunk.anchor."""
+    text = (
+        "# FastAPI { #fastapi }\n\n"
+        "FastAPI framework overview.\n\n"
+        "## Opinions { #opinions }\n\n"
+        "Here are user opinions.\n\n"
+        "## Unanchored Section\n\n"
+        "No anchor on this heading.\n"
+    )
+
+    doc = Document(source_path="fastapi.md", title="FastAPI", text=text)
+    chunks = chunk_documents([doc], max_tokens=100, overlap_tokens=10, min_tokens=10)
+
+    chunk_map = {c.heading_path: c for c in chunks}
+
+    # Verify { #anchor } is completely absent from all heading paths
+    for path in chunk_map:
+        assert "{ #" not in path
+        assert "}" not in path
+
+    assert "FastAPI" in chunk_map
+    assert chunk_map["FastAPI"].anchor == "fastapi"
+
+    assert "FastAPI > Opinions" in chunk_map
+    assert chunk_map["FastAPI > Opinions"].anchor == "opinions"
+
+    assert "FastAPI > Unanchored Section" in chunk_map
+    assert chunk_map["FastAPI > Unanchored Section"].anchor is None
+
+
+def test_drop_html_comment_and_directive_only_chunks() -> None:
+    """Chunks that consist only of HTML comments or only ::: directives must be dropped."""
+    text = (
+        "# Reference Guide\n\n"
+        "Here is real documentation content that should be preserved in a chunk.\n\n"
+        "## Comment Section\n\n"
+        "<!-- agent-banner -->\n\n"
+        "## Another Comment\n\n"
+        "<!-- sponsors -->\n"
+        "<!-- /sponsors -->\n\n"
+        "## API Router\n\n"
+        "::: fastapi.APIRouter\n"
+        "::: fastapi.routing.APIRoute\n\n"
+        "## Working Section\n\n"
+        "::: note\n"
+        "This note has accompanying body text so it is not only directive lines.\n"
+        ":::\n"
+    )
+
+    doc = Document(source_path="ref.md", title="Reference Guide", text=text)
+    chunks = chunk_documents([doc], max_tokens=150, overlap_tokens=10, min_tokens=10)
+
+    # Verify no chunk contains solely comments or solely ::: lines
+    for c in chunks:
+        assert re.sub(r"<!--[\s\S]*?-->", "", c.text).strip() != ""
+        lines = [line.strip() for line in c.text.strip().splitlines() if line.strip()]
+        assert not (bool(lines) and all(line.startswith(":::") for line in lines))
+
+    # Only Reference Guide and Working Section remain; Comment Section, Another Comment, and API Router were dropped
+    paths = [c.heading_path for c in chunks]
+    assert paths == ["Reference Guide", "Reference Guide > Working Section"]
+    assert len(chunks) == 2
+
+    # Verify IDs are deterministic and chunk_index is sequentially renumbered (0, 1, ...)
+    for i, chunk in enumerate(chunks):
+        assert chunk.chunk_index == i
+        assert chunk.chunk_id == f"ref.md::{i:04d}"

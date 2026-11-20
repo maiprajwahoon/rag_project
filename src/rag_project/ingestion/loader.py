@@ -59,13 +59,13 @@ def load_documents(
 
     Args:
         root: Root directory to search recursively for markdown files.
-        exclude: Relative paths of files to skip (defaults to {"release-notes.md"}).
+        exclude: Relative paths of files to skip (defaults to {"release-notes.md", "_llm-test.md"}).
 
     Returns:
         List of loaded Document models sorted by source_path.
     """
     if exclude is None:
-        exclude = {"release-notes.md"}
+        exclude = {"release-notes.md", "_llm-test.md"}
 
     root_path = Path(root)
     if not root_path.exists() or not root_path.is_dir():

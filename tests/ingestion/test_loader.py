@@ -86,12 +86,14 @@ def test_excluded_files_are_skipped(tmp_path: Path) -> None:
     """Files matching relative paths in exclude should be skipped."""
     (tmp_path / "included.md").write_text("# Included\n\nContent here.", encoding="utf-8")
     (tmp_path / "release-notes.md").write_text("# Release Notes\n\nNotes here.", encoding="utf-8")
+    (tmp_path / "_llm-test.md").write_text("# LLM Test\n\nTest content.", encoding="utf-8")
     (tmp_path / "skip_me.md").write_text("# Skip Me\n\nDo not include.", encoding="utf-8")
 
-    # Default exclude skips release-notes.md
+    # Default exclude skips release-notes.md and _llm-test.md
     docs_default = load_documents(tmp_path)
     paths_default = [d.source_path for d in docs_default]
     assert "release-notes.md" not in paths_default
+    assert "_llm-test.md" not in paths_default
     assert "included.md" in paths_default
     assert "skip_me.md" in paths_default
 
@@ -100,4 +102,5 @@ def test_excluded_files_are_skipped(tmp_path: Path) -> None:
     paths_custom = [d.source_path for d in docs_custom]
     assert "skip_me.md" not in paths_custom
     assert "release-notes.md" in paths_custom
+    assert "_llm-test.md" in paths_custom
     assert "included.md" in paths_custom

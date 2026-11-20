@@ -67,3 +67,7 @@ class Chunk(BaseModel):
         ...,
         description="Token count of this chunk.",
     )
+    anchor: str | None = Field(
+        default=None,
+        description="Optional HTML anchor identifier stripped from the heading.",
+    )
