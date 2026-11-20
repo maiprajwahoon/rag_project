@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from rag_project.ingestion.loader import load_documents
+from rag_project.ingestion.loader import load_documents, resolve_includes
 
 
 def test_front_matter_is_removed(tmp_path: Path) -> None:
@@ -104,3 +104,70 @@ def test_excluded_files_are_skipped(tmp_path: Path) -> None:
     assert "release-notes.md" in paths_custom
     assert "_llm-test.md" in paths_custom
     assert "included.md" in paths_custom
+
+
+def test_resolve_includes(tmp_path: Path) -> None:
+    """resolve_includes should replace snippet include lines with fenced code blocks."""
+    docs_src = tmp_path / "docs_src"
+    docs_src.mkdir()
+
+    # Create snippet file
+    snippet_code = "from fastapi import FastAPI\n\napp = FastAPI()\n"
+    (docs_src / "main.py").write_text(snippet_code, encoding="utf-8")
+
+    input_text = (
+        "# Tutorial\n\n"
+        "Here is the code:\n\n"
+        "{* ../../docs_src/main.py *}\n\n"
+        "And with highlight options:\n\n"
+        "{* ../../docs_src/main.py hl[1, 3] *}\n\n"
+        "Missing file:\n\n"
+        "{* ../../docs_src/missing.py *}\n\n"
+        "Assignment line:\n\n"
+        "x = {* a *}\n"
+    )
+
+    resolved = resolve_includes(input_text, docs_src)
+
+    # 1. A resolved include: replaced by fenced python block with leading comment line
+    expected_block = (
+        "```python\n"
+        "# File: main.py\n"
+        "from fastapi import FastAPI\n\n"
+        "app = FastAPI()\n"
+        "```"
+    )
+    assert expected_block in resolved
+
+    # 2. hl[...] ignored: produces the same clean fenced code block
+    assert resolved.count(expected_block) == 2
+
+    # 3. Missing file left unchanged
+    assert "{* ../../docs_src/missing.py *}" in resolved
+
+    # 4. Line like x = {* a *} left alone
+    assert "x = {* a *}" in resolved
+
+
+def test_load_documents_with_docs_src_root(tmp_path: Path) -> None:
+    """load_documents should resolve snippet includes when docs_src_root is provided."""
+    docs_dir = tmp_path / "docs"
+    docs_dir.mkdir()
+    docs_src = tmp_path / "docs_src"
+    docs_src.mkdir()
+
+    (docs_src / "app.py").write_text("x = 42\n", encoding="utf-8")
+    (docs_dir / "index.md").write_text(
+        "# Index\n\n{* ../../docs_src/app.py *}\n",
+        encoding="utf-8",
+    )
+
+    # With docs_src_root: resolved
+    docs = load_documents(docs_dir, docs_src_root=docs_src)
+    assert len(docs) == 1
+    assert "```python\n# File: app.py\nx = 42\n```" in docs[0].text
+
+    # Without docs_src_root (None): left unresolved
+    docs_none = load_documents(docs_dir, docs_src_root=None)
+    assert len(docs_none) == 1
+    assert "{* ../../docs_src/app.py *}" in docs_none[0].text
