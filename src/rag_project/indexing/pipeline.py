@@ -1,4 +1,4 @@
-"""Indexing pipeline: load → chunk → embed → upsert into Qdrant."""
+"""Indexing pipeline: load -> chunk -> embed -> upsert into Qdrant."""
 
 from pathlib import Path
 
@@ -48,7 +48,7 @@ def build_index(
 
     print(
         f"Indexed {len(docs)} documents, {len(chunks)} chunks "
-        f"→ collection '{collection_name}'."
+        f"-> collection '{collection_name}'."
     )
 
 
