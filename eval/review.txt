@@ -1,0 +1,143 @@
+[q01] How do I make a query parameter required?
+   page: tutorial/query-params-str-validations.md
+   headings: Query Parameters and String Validations | Additional validation | Import `Query` and `Annotated` | Use `Annotated` in the type for the `q` parameter | Add `Query` to `Annotated` in the `q` parameter | Alternative (old): `Query` as the default value | `Query` as the default value or in `Annotated` | Advantages of `Annotated` | Add more validations | Add regular expressions
+
+[q02] How do I set a maximum length on a query parameter?
+   page: tutorial/query-params-str-validations.md
+   headings: Query Parameters and String Validations | Additional validation | Import `Query` and `Annotated` | Use `Annotated` in the type for the `q` parameter | Add `Query` to `Annotated` in the `q` parameter | Alternative (old): `Query` as the default value | `Query` as the default value or in `Annotated` | Advantages of `Annotated` | Add more validations | Add regular expressions
+
+[q03] How do I declare a path parameter?
+   page: tutorial/path-params.md
+   headings: Path Parameters | Path parameters with types | Data <dfn title="also known as: serialization, parsing, marshalling">conversion</dfn> | Data validation | Documentation | Standards-based benefits, alternative documentation | Pydantic | Order matters | Predefined values | Create an `Enum` class
+
+[q04] How do I receive a JSON request body?
+   page: tutorial/body.md
+   headings: Request Body | Import Pydantic's `BaseModel` | Create your data model | Declare it as a parameter | Results | Automatic docs | Editor support | Use the model | Request body + path parameters | Request body + path + query parameters
+
+[q05] How do I return an error response by raising an HTTP exception?
+   page: tutorial/handling-errors.md
+   headings: Handling Errors | Use `HTTPException` | Import `HTTPException` | Raise an `HTTPException` in your code | The resulting response | Add custom headers | Install custom exception handlers | Override the default exception handlers | Override request validation exceptions | Override the `HTTPException` error handler
+
+[q06] How do I enable CORS?
+   page: tutorial/cors.md
+   headings: CORS (Cross-Origin Resource Sharing) | Origin | Steps | Wildcards | Use `CORSMiddleware` | CORS preflight requests | Simple requests | More info
+
+[q07] How do I run a task in the background after returning a response?
+   page: tutorial/background-tasks.md
+   headings: Background Tasks | Using `BackgroundTasks` | Create a task function | Add the background task | Dependency Injection | Technical Details | Caveat | Recap
+
+[q08] How do I upload a file?
+   page: tutorial/request-files.md
+   headings: Request Files | Import `File` | Define `File` Parameters | File Parameters with `UploadFile` | `UploadFile` | What is "Form Data" | Optional File Upload | `UploadFile` with Additional Metadata | Multiple File Uploads | Multiple File Uploads with Additional Metadata
+
+[q09] How do I read form data?
+   page: tutorial/request-forms.md
+   headings: Form Data | Import `Form` | Define `Form` parameters | Boolean Form Fields | About "Form Fields" | Recap
+
+[q10] How do I serve static files?
+   page: tutorial/static-files.md
+   headings: Static Files | Use `StaticFiles` | What is "Mounting" | Details | More info
+
+[q11] How do I write tests for my app?
+   page: tutorial/testing.md
+   headings: Testing | Using `TestClient` | Separating tests | **FastAPI** app file | Testing file | Testing: extended example | Extended **FastAPI** app file | Extended testing file | Run it
+
+[q12] How do I add custom middleware?
+   page: tutorial/middleware.md
+   headings: Middleware | Create a middleware | Before and after the `response` | Multiple middleware execution order | Other middlewares
+
+[q13] How do I limit which fields are returned in a response?
+   page: tutorial/response-model.md
+   headings: Response Model - Return Type | `response_model` Parameter | `response_model` Priority | Return the same input data | Add an output model | `response_model` or Return Type | Return Type and Data Filtering | Type Annotations and Tooling | FastAPI Data Filtering | See it in the docs
+
+[q14] How do I set the status code of a response?
+   page: tutorial/response-status-code.md
+   headings: Response Status Code | About HTTP status codes | Shortcut to remember the names | Changing the default
+
+[q15] How do I protect an endpoint with the OAuth2 password flow?
+   page: tutorial/security/first-steps.md
+   headings: Security - First Steps | How it looks | Create `main.py` | Run it | Check it | The `password` flow | **FastAPI**'s `OAuth2PasswordBearer` | Use it | What it does | Recap
+   page: tutorial/security/simple-oauth2.md
+   headings: Simple OAuth2 with Password and Bearer | Get the `username` and `password` | `scope` | Code to get the `username` and `password` | `OAuth2PasswordRequestForm` | Use the form data | Check the password | Return the token | Update the dependencies | See it in action
+
+[q16] How do I get the current logged-in user?
+   page: tutorial/security/get-current-user.md
+   headings: Get Current User | Create a user model | Create a `get_current_user` dependency | Get the user | Inject the current user | Other models | Code size | Recap
+
+[q17] How do I structure a larger application across multiple files?
+   page: tutorial/bigger-applications.md
+   headings: Bigger Applications - Multiple Files | An example file structure | `APIRouter` | Import `APIRouter` | *Path operations* with `APIRouter` | Dependencies | Another module with `APIRouter` | Import the dependencies | Add some custom `tags`, `responses`, and `dependencies` | The main `FastAPI`
+
+[q18] How do I package my app in a Docker container?
+   page: deployment/docker.md
+   headings: FastAPI in Containers - Docker | If running behind a proxy like Nginx or Traefik add --proxy-headers | CMD ["fastapi", "run", "app/main.py", "--port", "80", "--proxy-headers"] | What is a Container | What is a Container Image | Container Images | Containers and Processes | Build a Docker Image for FastAPI | Package Requirements | Create the **FastAPI** Code
+
+[q19] How do I use WebSockets?
+   page: advanced/websockets.md
+   headings: WebSockets | Install `websockets` | WebSockets client | In production | Create a `websocket` | Await for messages and send messages | Try it | Using `Depends` and others | Try the WebSockets with dependencies | Handling disconnections and multiple clients
+
+[q20] How do I share logic between endpoints with dependencies?
+   page: tutorial/dependencies/index.md
+   headings: Dependencies | What is "Dependency Injection" | First Steps | Create a dependency, or "dependable" | Import `Depends` | Declare the dependency, in the "dependant" | Share `Annotated` dependencies | To `async` or not to `async` | Integrated with OpenAPI | Simple usage
+
+[q21] How do I run code at application startup and shutdown?
+   page: advanced/events.md
+   headings: Lifespan Events | Use Case | Lifespan | Lifespan function | Async Context Manager | Alternative Events (deprecated) | `startup` event | `shutdown` event | `startup` and `shutdown` together | Technical Details
+
+[q22] How do I add example data to the generated OpenAPI schema?
+   page: tutorial/schema-extra-example.md
+   headings: Declare Request Example Data | Extra JSON Schema data in Pydantic models | `Field` additional arguments | `examples` in JSON Schema - OpenAPI | `Body` with `examples` | Example in the docs UI | `Body` with multiple `examples` | OpenAPI-specific `examples` | Using the `openapi_examples` Parameter | OpenAPI Examples in the Docs UI
+
+[u01] What is the capital of France?
+   (should NOT be answerable from the docs)
+
+[u02] How do I fine-tune a large language model?
+   (should NOT be answerable from the docs)
+
+[u03] How do I write a web server in Rust with Actix?
+   (should NOT be answerable from the docs)
+
+[u04] Who won the 2022 football World Cup?
+   (should NOT be answerable from the docs)
+
+[u05] How do I train an image classifier with PyTorch?
+   (should NOT be answerable from the docs)
+
+[u06] What is a good recipe for chocolate cake?
+   (should NOT be answerable from the docs)
+
+[h01] My endpoint returns fields I do not want to expose, like a password. How do I hide them?
+   page: tutorial/response-model.md
+   headings: Response Model - Return Type | `response_model` Parameter | `response_model` Priority | Return the same input data | Add an output model | `response_model` or Return Type | Return Type and Data Filtering | Type Annotations and Tooling | FastAPI Data Filtering | See it in the docs
+   page: tutorial/extra-models.md
+   headings: Extra Models | Multiple models | About `**user_in.model_dump()` | Reduce duplication | `Union` or `anyOf` | `Union` in Python 3.10 | List of models | Response with arbitrary `dict` | Recap
+
+[h02] How can I make sure a number sent by the client is between 1 and 100?
+   page: tutorial/path-params-numeric-validations.md
+   headings: Path Parameters and Numeric Validations | Import `Path` | Declare metadata | Order the parameters as you need | Order the parameters as you need, tricks | Better with `Annotated` | Number validations: greater than or equal | Number validations: greater than and less than or equal | Number validations: floats, greater than and less than | Recap
+
+[h03] What is the difference between def and async def for my endpoints?
+   page: async.md
+   headings: Concurrency and async / await | In a hurry? | Technical Details | Asynchronous Code | Concurrency and Burgers | Concurrent Burgers | Parallel Burgers | Burger Conclusion | Is concurrency better than parallelism? | Concurrency + Parallelism: Web + Machine Learning
+
+[h04] Can I change the error message the client gets when they send invalid data?
+   page: tutorial/handling-errors.md
+   headings: Handling Errors | Use `HTTPException` | Import `HTTPException` | Raise an `HTTPException` in your code | The resulting response | Add custom headers | Install custom exception handlers | Override the default exception handlers | Override request validation exceptions | Override the `HTTPException` error handler
+
+[h05] How do I read a custom header sent by the client?
+   page: tutorial/header-params.md
+   headings: Header Parameters | Import `Header` | Declare `Header` parameters | Automatic conversion | Duplicate headers | Recap
+
+[h06] How do I read a cookie from the request?
+   page: tutorial/cookie-params.md
+   headings: Cookie Parameters | Import `Cookie` | Declare `Cookie` parameters | Recap
+
+[h07] How do I give my API a title and description in the generated docs?
+   page: tutorial/metadata.md
+   headings: Metadata and Docs URLs | Metadata for API | License identifier | Metadata for tags | Create metadata for tags | Use your tags | Check the docs | Order of tags | OpenAPI URL | Docs URLs
+
+[h08] How do I run my app in production with several worker processes?
+   page: deployment/server-workers.md
+   headings: Server Workers - Uvicorn with Workers | Multiple Workers | Deployment Concepts | Containers and Docker | Recap
+   page: deployment/concepts.md
+   headings: Deployments Concepts | Security - HTTPS | Example Tools for HTTPS | Program and Process | What is a Program | What is a Process | Running on Startup | In a Remote Server | Run Automatically on Startup | Separate Program
