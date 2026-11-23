@@ -1,0 +1,36 @@
+{"id": "q01", "question": "How do I make a query parameter required?", "pages": ["tutorial/query-params-str-validations.md"], "answerable": true}
+{"id": "q02", "question": "How do I set a maximum length on a query parameter?", "pages": ["tutorial/query-params-str-validations.md"], "answerable": true}
+{"id": "q03", "question": "How do I declare a path parameter?", "pages": ["tutorial/path-params.md"], "answerable": true}
+{"id": "q04", "question": "How do I receive a JSON request body?", "pages": ["tutorial/body.md"], "answerable": true}
+{"id": "q05", "question": "How do I return an error response by raising an HTTP exception?", "pages": ["tutorial/handling-errors.md"], "answerable": true}
+{"id": "q06", "question": "How do I enable CORS?", "pages": ["tutorial/cors.md"], "answerable": true}
+{"id": "q07", "question": "How do I run a task in the background after returning a response?", "pages": ["tutorial/background-tasks.md"], "answerable": true}
+{"id": "q08", "question": "How do I upload a file?", "pages": ["tutorial/request-files.md"], "answerable": true}
+{"id": "q09", "question": "How do I read form data?", "pages": ["tutorial/request-forms.md"], "answerable": true}
+{"id": "q10", "question": "How do I serve static files?", "pages": ["tutorial/static-files.md"], "answerable": true}
+{"id": "q11", "question": "How do I write tests for my app?", "pages": ["tutorial/testing.md"], "answerable": true}
+{"id": "q12", "question": "How do I add custom middleware?", "pages": ["tutorial/middleware.md"], "answerable": true}
+{"id": "q13", "question": "How do I limit which fields are returned in a response?", "pages": ["tutorial/response-model.md"], "answerable": true}
+{"id": "q14", "question": "How do I set the status code of a response?", "pages": ["tutorial/response-status-code.md"], "answerable": true}
+{"id": "q15", "question": "How do I protect an endpoint with the OAuth2 password flow?", "pages": ["tutorial/security/first-steps.md", "tutorial/security/simple-oauth2.md"], "answerable": true}
+{"id": "q16", "question": "How do I get the current logged-in user?", "pages": ["tutorial/security/get-current-user.md"], "answerable": true}
+{"id": "q17", "question": "How do I structure a larger application across multiple files?", "pages": ["tutorial/bigger-applications.md"], "answerable": true}
+{"id": "q18", "question": "How do I package my app in a Docker container?", "pages": ["deployment/docker.md"], "answerable": true}
+{"id": "q19", "question": "How do I use WebSockets?", "pages": ["advanced/websockets.md"], "answerable": true}
+{"id": "q20", "question": "How do I share logic between endpoints with dependencies?", "pages": ["tutorial/dependencies/index.md"], "answerable": true}
+{"id": "q21", "question": "How do I run code at application startup and shutdown?", "pages": ["advanced/events.md"], "answerable": true}
+{"id": "q22", "question": "How do I add example data to the generated OpenAPI schema?", "pages": ["tutorial/schema-extra-example.md"], "answerable": true}
+{"id": "u01", "question": "What is the capital of France?", "pages": [], "answerable": false}
+{"id": "u02", "question": "How do I fine-tune a large language model?", "pages": [], "answerable": false}
+{"id": "u03", "question": "How do I write a web server in Rust with Actix?", "pages": [], "answerable": false}
+{"id": "u04", "question": "Who won the 2022 football World Cup?", "pages": [], "answerable": false}
+{"id": "u05", "question": "How do I train an image classifier with PyTorch?", "pages": [], "answerable": false}
+{"id": "u06", "question": "What is a good recipe for chocolate cake?", "pages": [], "answerable": false}
+{"id": "h01", "question": "My endpoint returns fields I do not want to expose, like a password. How do I hide them?", "pages": ["tutorial/response-model.md", "tutorial/extra-models.md"], "answerable": true}
+{"id": "h02", "question": "How can I make sure a number sent by the client is between 1 and 100?", "pages": ["tutorial/path-params-numeric-validations.md"], "answerable": true}
+{"id": "h03", "question": "What is the difference between def and async def for my endpoints?", "pages": ["async.md"], "answerable": true}
+{"id": "h04", "question": "Can I change the error message the client gets when they send invalid data?", "pages": ["tutorial/handling-errors.md"], "answerable": true}
+{"id": "h05", "question": "How do I read a custom header sent by the client?", "pages": ["tutorial/header-params.md"], "answerable": true}
+{"id": "h06", "question": "How do I read a cookie from the request?", "pages": ["tutorial/cookie-params.md"], "answerable": true}
+{"id": "h07", "question": "How do I give my API a title and description in the generated docs?", "pages": ["tutorial/metadata.md"], "answerable": true}
+{"id": "h08", "question": "How do I run my app in production with several worker processes?", "pages": ["deployment/server-workers.md", "deployment/concepts.md"], "answerable": true}
