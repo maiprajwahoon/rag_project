@@ -1,9 +1,12 @@
-﻿import re
+import re
 from pathlib import Path
 
 repo = Path("data/raw/fastapi")
 root = repo / "docs/en/docs"
-print("docs_src folders found:", [str(p) for p in repo.rglob("docs_src") if p.is_dir()][:5])
+print(
+    "docs_src folders found:",
+    [str(p) for p in repo.rglob("docs_src") if p.is_dir()][:5],
+)
 
 pat = re.compile(r"\{\*\s*(\S+)")
 total = found = 0

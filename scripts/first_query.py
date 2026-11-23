@@ -1,4 +1,4 @@
-﻿from rag_project.indexing.embedder import Embedder
+from rag_project.indexing.embedder import Embedder
 from rag_project.indexing.store import QdrantStore
 
 store = QdrantStore()

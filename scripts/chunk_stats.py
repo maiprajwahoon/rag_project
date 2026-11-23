@@ -1,4 +1,4 @@
-﻿from collections import Counter
+from collections import Counter
 from pathlib import Path
 
 from rag_project.ingestion.chunker import chunk_documents

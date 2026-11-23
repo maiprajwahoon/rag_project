@@ -1,4 +1,4 @@
-﻿import re
+import re
 from pathlib import Path
 
 root = Path("data/raw/fastapi/docs/en/docs")

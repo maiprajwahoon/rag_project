@@ -1,4 +1,4 @@
-﻿from pathlib import Path
+from pathlib import Path
 
 from rag_project.ingestion.chunker import chunk_documents
 from rag_project.ingestion.loader import load_documents
@@ -16,7 +16,7 @@ print("--- context around remaining '{*' ---")
 for c in chunks:
     i = c.text.find("{*")
     if i != -1:
-        print(c.source_path, "|", repr(c.text[max(0, i - 40): i + 80]))
+        print(c.source_path, "|", repr(c.text[max(0, i - 40) : i + 80]))
 
 unbalanced = [c for c in chunks if c.text.count("```") % 2 == 1]
 print("--- chunks with an unbalanced code fence:", len(unbalanced))
@@ -28,5 +28,5 @@ for c in chunks:
     i = c.text.find("# File:")
     if i != -1:
         print(c.chunk_id)
-        print(c.text[max(0, i - 60): i + 300])
+        print(c.text[max(0, i - 60) : i + 300])
         break

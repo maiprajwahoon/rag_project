@@ -8,7 +8,10 @@ from rag_project.ingestion.models import Document
 
 def test_every_chunk_is_within_max_tokens() -> None:
     """Every generated chunk must have token_count <= max_tokens."""
-    long_paragraph = "FastAPI is a modern, fast, high-performance web framework for building APIs with Python. " * 30
+    long_paragraph = (
+        "FastAPI is a modern, fast, high-performance web framework for building APIs with Python. "
+        * 30
+    )
     text = (
         "# Overview\n\n"
         f"{long_paragraph}\n\n"
@@ -78,8 +81,14 @@ def test_heading_paths_are_preserved() -> None:
 def test_code_block_not_split_mid_block() -> None:
     """A fenced code block must not be split mid-block when the section is split by paragraph."""
     code = "```python\ndef get_items(skip: int = 0, limit: int = 10):\n    return items[skip : skip + limit]\n```"
-    p1 = "Paragraph before code that contains some introductory text for the reader. " * 3
-    p2 = "Paragraph after code that contains explanatory remarks and following details. " * 3
+    p1 = (
+        "Paragraph before code that contains some introductory text for the reader. "
+        * 3
+    )
+    p2 = (
+        "Paragraph after code that contains explanatory remarks and following details. "
+        * 3
+    )
     text = f"# Section\n\n{p1}\n\n{code}\n\n{p2}"
 
     doc = Document(source_path="code.md", title="Section", text=text)
@@ -98,13 +107,21 @@ def test_code_block_not_split_mid_block() -> None:
             assert code in chunk.text
             found_code_chunk = True
 
-    assert found_code_chunk, "The code block should be present intact in at least one chunk."
+    assert found_code_chunk, (
+        "The code block should be present intact in at least one chunk."
+    )
 
 
 def test_oversized_code_block_is_split() -> None:
     """When a code block alone exceeds max_tokens, it must be split so every chunk <= max_tokens."""
-    huge_code = "```python\n" + "\n".join(f"    line_{i} = {i} * 2" for i in range(100)) + "\n```"
-    doc = Document(source_path="huge.md", title="Huge Code", text=f"# Huge\n\n{huge_code}")
+    huge_code = (
+        "```python\n"
+        + "\n".join(f"    line_{i} = {i} * 2" for i in range(100))
+        + "\n```"
+    )
+    doc = Document(
+        source_path="huge.md", title="Huge Code", text=f"# Huge\n\n{huge_code}"
+    )
 
     max_tokens = 50
     chunks = chunk_documents([doc], max_tokens=max_tokens, overlap_tokens=10)
@@ -160,7 +177,9 @@ def test_no_chunk_below_min_tokens_unless_only_chunk_in_section() -> None:
     doc = Document(source_path="min_tokens.md", title="Min Tokens Test", text=text)
     min_tokens = 30
     max_tokens = 100
-    chunks = chunk_documents([doc], max_tokens=max_tokens, overlap_tokens=10, min_tokens=min_tokens)
+    chunks = chunk_documents(
+        [doc], max_tokens=max_tokens, overlap_tokens=10, min_tokens=min_tokens
+    )
 
     # Section Gamma is a lone heading with no body; it must be dropped
     assert not any("Section Gamma" in c.heading_path for c in chunks)
@@ -173,30 +192,29 @@ def test_no_chunk_below_min_tokens_unless_only_chunk_in_section() -> None:
     for heading_path, chs in section_chunks.items():
         if len(chs) > 1:
             for c in chs:
-                assert (
-                    c.token_count >= min_tokens
-                ), f"Chunk {c.chunk_id} in multi-chunk section {heading_path} has {c.token_count} < {min_tokens}"
+                assert c.token_count >= min_tokens, (
+                    f"Chunk {c.chunk_id} in multi-chunk section {heading_path} has {c.token_count} < {min_tokens}"
+                )
         else:
             assert len(chs) == 1
 
 
 def test_all_chunks_are_still_at_most_max_tokens() -> None:
     """After merging small chunks, all chunks must still be <= max_tokens."""
-    p_long = "Python type hints enable automatic validation, serialization, and documentation. " * 4
+    p_long = (
+        "Python type hints enable automatic validation, serialization, and documentation. "
+        * 4
+    )
     p_small = "Tiny remark."
 
-    text = (
-        "# Main Section\n\n"
-        f"{p_long}\n\n"
-        f"{p_small}\n\n"
-        f"{p_long}\n\n"
-        f"{p_small}\n"
-    )
+    text = f"# Main Section\n\n{p_long}\n\n{p_small}\n\n{p_long}\n\n{p_small}\n"
 
     doc = Document(source_path="merge_max.md", title="Merge Max", text=text)
     max_tokens = 100
     min_tokens = 30
-    chunks = chunk_documents([doc], max_tokens=max_tokens, overlap_tokens=10, min_tokens=min_tokens)
+    chunks = chunk_documents(
+        [doc], max_tokens=max_tokens, overlap_tokens=10, min_tokens=min_tokens
+    )
 
     assert len(chunks) > 1
     for chunk in chunks:
@@ -281,9 +299,7 @@ def test_every_chunk_has_balanced_fences() -> None:
     an opening and a closing fence so it is fully self-contained.
     """
     # Build a code block large enough to need splitting: many top-level functions
-    funcs = "\n\n".join(
-        f"def func_{i}():\n    return {i}" for i in range(50)
-    )
+    funcs = "\n\n".join(f"def func_{i}():\n    return {i}" for i in range(50))
     code = f"```python\n{funcs}\n```"
     text = f"# Section\n\n{code}"
     doc = Document(source_path="fences.md", title="Fences", text=text)
@@ -316,7 +332,9 @@ def test_no_chunk_starts_with_partial_line() -> None:
     for chunk in chunks:
         first_line = chunk.text.splitlines()[0]
         # A chunk starting with pure indented content (not a fence line) is a split artifact
-        is_indented_non_fence = first_line.startswith("    ") and not first_line.strip().startswith("```")
+        is_indented_non_fence = first_line.startswith(
+            "    "
+        ) and not first_line.strip().startswith("```")
         assert not is_indented_non_fence, (
             f"Chunk {chunk.chunk_id} starts with indented non-fence line: {first_line!r}"
         )
@@ -343,9 +361,13 @@ def test_large_code_block_splits_into_balanced_chunks() -> None:
     )
     max_tokens = 100
 
-    chunks = chunk_documents([doc], max_tokens=max_tokens, overlap_tokens=10, min_tokens=20)
+    chunks = chunk_documents(
+        [doc], max_tokens=max_tokens, overlap_tokens=10, min_tokens=20
+    )
 
-    assert len(chunks) > 3, f"Expected several chunks from large code block, got {len(chunks)}"
+    assert len(chunks) > 3, (
+        f"Expected several chunks from large code block, got {len(chunks)}"
+    )
     for chunk in chunks:
         assert chunk.token_count <= max_tokens, (
             f"Chunk {chunk.chunk_id} exceeds max_tokens: {chunk.token_count}"

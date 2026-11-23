@@ -95,7 +95,9 @@ def _split_document_by_headings(text: str) -> list[tuple[str, str | None, str]]:
                 # Flush previous section content if non-empty
                 section_content = "\n".join(current_lines).strip()
                 if section_content:
-                    sections.append((current_heading_path, current_anchor, section_content))
+                    sections.append(
+                        (current_heading_path, current_anchor, section_content)
+                    )
                 current_lines = []
 
                 # Update heading stack
@@ -219,7 +221,9 @@ def _is_safe_split_point(line: str) -> bool:
     return len(line) > 0 and not line[0].isspace()
 
 
-def _split_oversized_code_block(block: str, max_tokens: int, min_tokens: int) -> list[str]:
+def _split_oversized_code_block(
+    block: str, max_tokens: int, min_tokens: int
+) -> list[str]:
     """Split a fenced code block that exceeds max_tokens into balanced, self-contained pieces.
 
     Each piece is a complete fenced code block (open fence ... close fence).
@@ -251,7 +255,11 @@ def _split_oversized_code_block(block: str, max_tokens: int, min_tokens: int) ->
         return f"{continuation_open}\n{inner_text}\n{fence_close}"
 
     def _piece_fits(inner_lines_list: list[str], is_first: bool) -> bool:
-        p = _build_piece(inner_lines_list) if is_first else _build_continuation_piece(inner_lines_list)
+        p = (
+            _build_piece(inner_lines_list)
+            if is_first
+            else _build_continuation_piece(inner_lines_list)
+        )
         return count_tokens(p) <= max_tokens
 
     is_first_piece = True
@@ -276,7 +284,11 @@ def _split_oversized_code_block(block: str, max_tokens: int, min_tokens: int) ->
                 remaining_lines = current_inner_lines[split_at:]
 
                 if piece_lines:
-                    piece = _build_piece(piece_lines) if is_first_piece else _build_continuation_piece(piece_lines)
+                    piece = (
+                        _build_piece(piece_lines)
+                        if is_first_piece
+                        else _build_continuation_piece(piece_lines)
+                    )
                     pieces.append(piece)
                     is_first_piece = False
                     current_inner_lines = remaining_lines + [line]
@@ -287,7 +299,11 @@ def _split_oversized_code_block(block: str, max_tokens: int, min_tokens: int) ->
                 current_inner_lines.append(line)
 
     if current_inner_lines:
-        piece = _build_piece(current_inner_lines) if is_first_piece else _build_continuation_piece(current_inner_lines)
+        piece = (
+            _build_piece(current_inner_lines)
+            if is_first_piece
+            else _build_continuation_piece(current_inner_lines)
+        )
         pieces.append(piece)
 
     if not pieces:
@@ -308,7 +324,9 @@ def _split_oversized_code_block(block: str, max_tokens: int, min_tokens: int) ->
     return result
 
 
-def _split_oversized_block(block: str, max_tokens: int, min_tokens: int = 0) -> list[str]:
+def _split_oversized_block(
+    block: str, max_tokens: int, min_tokens: int = 0
+) -> list[str]:
     """Split an individual block that alone exceeds max_tokens.
 
     For fenced code blocks, splits at safe points (blank lines, column-0 lines like def/class/@)
@@ -335,7 +353,9 @@ def _split_oversized_block(block: str, max_tokens: int, min_tokens: int = 0) -> 
                 words = line.split(" ")
                 current_words: list[str] = []
                 for word in words:
-                    cand_word = " ".join(current_words + [word]) if current_words else word
+                    cand_word = (
+                        " ".join(current_words + [word]) if current_words else word
+                    )
                     if count_tokens(cand_word) <= max_tokens:
                         current_words.append(word)
                     else:
@@ -401,7 +421,9 @@ def _chunk_blocks(
     normalized_blocks: list[str] = []
     for block in blocks:
         if count_tokens(block) > max_tokens:
-            normalized_blocks.extend(_split_oversized_block(block, max_tokens, min_tokens))
+            normalized_blocks.extend(
+                _split_oversized_block(block, max_tokens, min_tokens)
+            )
         else:
             normalized_blocks.append(block)
 
@@ -491,14 +513,20 @@ def _postprocess_section_chunks(
                 break
 
             # Try merging into previous chunk of the same section if it fits within max_tokens
-            if idx > 0 and count_tokens(result[idx - 1] + "\n\n" + result[idx]) <= max_tokens:
+            if (
+                idx > 0
+                and count_tokens(result[idx - 1] + "\n\n" + result[idx]) <= max_tokens
+            ):
                 result[idx - 1] = result[idx - 1] + "\n\n" + result[idx]
                 result.pop(idx)
                 idx = max(0, idx - 1)
                 continue
 
             # Otherwise into next chunk if it fits within max_tokens
-            if idx < len(result) - 1 and count_tokens(result[idx] + "\n\n" + result[idx + 1]) <= max_tokens:
+            if (
+                idx < len(result) - 1
+                and count_tokens(result[idx] + "\n\n" + result[idx + 1]) <= max_tokens
+            ):
                 result[idx + 1] = result[idx] + "\n\n" + result[idx + 1]
                 result.pop(idx)
                 continue
@@ -549,7 +577,9 @@ def chunk_documents(
                 blocks = _split_section_into_blocks(section_text)
                 raw_chunk_texts = _chunk_blocks(blocks, max_tokens, overlap_tokens)
 
-            chunk_texts = _postprocess_section_chunks(raw_chunk_texts, max_tokens, min_tokens)
+            chunk_texts = _postprocess_section_chunks(
+                raw_chunk_texts, max_tokens, min_tokens
+            )
 
             for text in chunk_texts:
                 token_count = count_tokens(text)

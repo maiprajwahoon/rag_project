@@ -14,7 +14,9 @@ from rag_project.config import get_settings
 from rag_project.ingestion.models import Chunk
 
 _UPSERT_BATCH_SIZE = 128
-_NAMESPACE_UUID = uuid.UUID("6ba7b810-9dad-11d1-80b4-00c04fd430c8")  # uuid.NAMESPACE_URL
+_NAMESPACE_UUID = uuid.UUID(
+    "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+)  # uuid.NAMESPACE_URL
 
 
 def _chunk_id_to_point_id(chunk_id: str) -> str:
