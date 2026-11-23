@@ -6,3 +6,4 @@ __pycache__/
 .ruff_cache/
 qdrant_storage/
 data/raw/
+eval/cache/

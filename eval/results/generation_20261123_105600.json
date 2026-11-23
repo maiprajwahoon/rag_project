@@ -1,0 +1,493 @@
+{
+  "created": "2026-11-23T10:56:00+00:00",
+  "golden_sha": "bded6e3744",
+  "model": "gemini-3.5-flash-lite",
+  "prompt_version": "answer_v1",
+  "k": 5,
+  "summary": {
+    "n_answerable": 30,
+    "n_unanswerable": 6,
+    "answered_when_answerable": 0.8666666666666667,
+    "refused_when_unanswerable": 1.0,
+    "accuracy": 0.8888888888888888,
+    "cited_page_hit_rate": 0.9615384615384616,
+    "faithfulness_rate": null,
+    "n_judged": 0
+  },
+  "outcomes": [
+    {
+      "id": "q01",
+      "answerable": true,
+      "refused": false,
+      "refusal_reason": null,
+      "attempts": 1,
+      "cited_ids": [
+        "tutorial/query-params.md::0005"
+      ],
+      "cited_page_hit": false,
+      "faithful": null,
+      "unsupported_claims": []
+    },
+    {
+      "id": "q02",
+      "answerable": true,
+      "refused": false,
+      "refusal_reason": null,
+      "attempts": 1,
+      "cited_ids": [
+        "tutorial/query-params-str-validations.md::0004",
+        "tutorial/query-params-str-validations.md::0006"
+      ],
+      "cited_page_hit": true,
+      "faithful": null,
+      "unsupported_claims": []
+    },
+    {
+      "id": "q03",
+      "answerable": true,
+      "refused": false,
+      "refusal_reason": null,
+      "attempts": 1,
+      "cited_ids": [
+        "tutorial/path-params.md::0000"
+      ],
+      "cited_page_hit": true,
+      "faithful": null,
+      "unsupported_claims": []
+    },
+    {
+      "id": "q04",
+      "answerable": true,
+      "refused": true,
+      "refusal_reason": "insufficient_evidence",
+      "attempts": 1,
+      "cited_ids": [],
+      "cited_page_hit": null,
+      "faithful": null,
+      "unsupported_claims": []
+    },
+    {
+      "id": "q05",
+      "answerable": true,
+      "refused": false,
+      "refusal_reason": null,
+      "attempts": 1,
+      "cited_ids": [
+        "tutorial/handling-errors.md::0001",
+        "tutorial/handling-errors.md::0003"
+      ],
+      "cited_page_hit": true,
+      "faithful": null,
+      "unsupported_claims": []
+    },
+    {
+      "id": "q06",
+      "answerable": true,
+      "refused": false,
+      "refusal_reason": null,
+      "attempts": 1,
+      "cited_ids": [
+        "tutorial/cors.md::0004",
+        "tutorial/cors.md::0005"
+      ],
+      "cited_page_hit": true,
+      "faithful": null,
+      "unsupported_claims": []
+    },
+    {
+      "id": "q07",
+      "answerable": true,
+      "refused": false,
+      "refusal_reason": null,
+      "attempts": 1,
+      "cited_ids": [
+        "tutorial/background-tasks.md::0000",
+        "reference/background.md::0000"
+      ],
+      "cited_page_hit": true,
+      "faithful": null,
+      "unsupported_claims": []
+    },
+    {
+      "id": "q08",
+      "answerable": true,
+      "refused": false,
+      "refusal_reason": null,
+      "attempts": 1,
+      "cited_ids": [
+        "tutorial/request-files.md::0001",
+        "tutorial/request-files.md::0002",
+        "tutorial/request-files.md::0012"
+      ],
+      "cited_page_hit": true,
+      "faithful": null,
+      "unsupported_claims": []
+    },
+    {
+      "id": "q09",
+      "answerable": true,
+      "refused": false,
+      "refusal_reason": null,
+      "attempts": 1,
+      "cited_ids": [
+        "tutorial/request-forms.md::0005"
+      ],
+      "cited_page_hit": true,
+      "faithful": null,
+      "unsupported_claims": []
+    },
+    {
+      "id": "q10",
+      "answerable": true,
+      "refused": false,
+      "refusal_reason": null,
+      "attempts": 1,
+      "cited_ids": [
+        "tutorial/static-files.md::0000",
+        "reference/staticfiles.md::0000",
+        "tutorial/static-files.md::0001"
+      ],
+      "cited_page_hit": true,
+      "faithful": null,
+      "unsupported_claims": []
+    },
+    {
+      "id": "q11",
+      "answerable": true,
+      "refused": false,
+      "refusal_reason": null,
+      "attempts": 1,
+      "cited_ids": [
+        "tutorial/testing.md::0003",
+        "tutorial/testing.md::0005",
+        "tutorial/testing.md::0010"
+      ],
+      "cited_page_hit": true,
+      "faithful": null,
+      "unsupported_claims": []
+    },
+    {
+      "id": "q12",
+      "answerable": true,
+      "refused": false,
+      "refusal_reason": null,
+      "attempts": 1,
+      "cited_ids": [
+        "tutorial/middleware.md::0001"
+      ],
+      "cited_page_hit": true,
+      "faithful": null,
+      "unsupported_claims": []
+    },
+    {
+      "id": "q13",
+      "answerable": true,
+      "refused": false,
+      "refusal_reason": null,
+      "attempts": 1,
+      "cited_ids": [
+        "how-to/general.md::0001",
+        "tutorial/response-model.md::0020",
+        "tutorial/response-model.md::0024"
+      ],
+      "cited_page_hit": true,
+      "faithful": null,
+      "unsupported_claims": []
+    },
+    {
+      "id": "q14",
+      "answerable": true,
+      "refused": false,
+      "refusal_reason": null,
+      "attempts": 1,
+      "cited_ids": [
+        "advanced/additional-status-codes.md::0001",
+        "advanced/response-change-status-code.md::0002",
+        "tutorial/path-operation-configuration.md::0001",
+        "tutorial/response-status-code.md::0000"
+      ],
+      "cited_page_hit": true,
+      "faithful": null,
+      "unsupported_claims": []
+    },
+    {
+      "id": "q15",
+      "answerable": true,
+      "refused": false,
+      "refusal_reason": null,
+      "attempts": 1,
+      "cited_ids": [
+        "tutorial/security/first-steps.md::0006"
+      ],
+      "cited_page_hit": true,
+      "faithful": null,
+      "unsupported_claims": []
+    },
+    {
+      "id": "q16",
+      "answerable": true,
+      "refused": false,
+      "refusal_reason": null,
+      "attempts": 1,
+      "cited_ids": [
+        "tutorial/security/get-current-user.md::0007",
+        "tutorial/security/simple-oauth2.md::0020"
+      ],
+      "cited_page_hit": true,
+      "faithful": null,
+      "unsupported_claims": []
+    },
+    {
+      "id": "q17",
+      "answerable": true,
+      "refused": false,
+      "refusal_reason": null,
+      "attempts": 1,
+      "cited_ids": [
+        "tutorial/bigger-applications.md::0000",
+        "tutorial/bigger-applications.md::0001"
+      ],
+      "cited_page_hit": true,
+      "faithful": null,
+      "unsupported_claims": []
+    },
+    {
+      "id": "q18",
+      "answerable": true,
+      "refused": false,
+      "refusal_reason": null,
+      "attempts": 1,
+      "cited_ids": [
+        "deployment/docker.md::0011",
+        "deployment/docker.md::0015"
+      ],
+      "cited_page_hit": true,
+      "faithful": null,
+      "unsupported_claims": []
+    },
+    {
+      "id": "q19",
+      "answerable": true,
+      "refused": false,
+      "refusal_reason": null,
+      "attempts": 1,
+      "cited_ids": [
+        "advanced/websockets.md::0001",
+        "advanced/websockets.md::0019",
+        "advanced/testing-websockets.md::0000"
+      ],
+      "cited_page_hit": true,
+      "faithful": null,
+      "unsupported_claims": []
+    },
+    {
+      "id": "q20",
+      "answerable": true,
+      "refused": true,
+      "refusal_reason": "insufficient_evidence",
+      "attempts": 1,
+      "cited_ids": [],
+      "cited_page_hit": null,
+      "faithful": null,
+      "unsupported_claims": []
+    },
+    {
+      "id": "q21",
+      "answerable": true,
+      "refused": false,
+      "refusal_reason": null,
+      "attempts": 1,
+      "cited_ids": [
+        "advanced/events.md::0000",
+        "advanced/events.md::0008",
+        "advanced/events.md::0009"
+      ],
+      "cited_page_hit": true,
+      "faithful": null,
+      "unsupported_claims": []
+    },
+    {
+      "id": "q22",
+      "answerable": true,
+      "refused": false,
+      "refusal_reason": null,
+      "attempts": 1,
+      "cited_ids": [
+        "tutorial/schema-extra-example.md::0004",
+        "tutorial/schema-extra-example.md::0014"
+      ],
+      "cited_page_hit": true,
+      "faithful": null,
+      "unsupported_claims": []
+    },
+    {
+      "id": "u01",
+      "answerable": false,
+      "refused": true,
+      "refusal_reason": "insufficient_evidence",
+      "attempts": 1,
+      "cited_ids": [],
+      "cited_page_hit": null,
+      "faithful": null,
+      "unsupported_claims": []
+    },
+    {
+      "id": "u02",
+      "answerable": false,
+      "refused": true,
+      "refusal_reason": "insufficient_evidence",
+      "attempts": 1,
+      "cited_ids": [],
+      "cited_page_hit": null,
+      "faithful": null,
+      "unsupported_claims": []
+    },
+    {
+      "id": "u03",
+      "answerable": false,
+      "refused": true,
+      "refusal_reason": "insufficient_evidence",
+      "attempts": 1,
+      "cited_ids": [],
+      "cited_page_hit": null,
+      "faithful": null,
+      "unsupported_claims": []
+    },
+    {
+      "id": "u04",
+      "answerable": false,
+      "refused": true,
+      "refusal_reason": "insufficient_evidence",
+      "attempts": 1,
+      "cited_ids": [],
+      "cited_page_hit": null,
+      "faithful": null,
+      "unsupported_claims": []
+    },
+    {
+      "id": "u05",
+      "answerable": false,
+      "refused": true,
+      "refusal_reason": "insufficient_evidence",
+      "attempts": 1,
+      "cited_ids": [],
+      "cited_page_hit": null,
+      "faithful": null,
+      "unsupported_claims": []
+    },
+    {
+      "id": "u06",
+      "answerable": false,
+      "refused": true,
+      "refusal_reason": "insufficient_evidence",
+      "attempts": 1,
+      "cited_ids": [],
+      "cited_page_hit": null,
+      "faithful": null,
+      "unsupported_claims": []
+    },
+    {
+      "id": "h01",
+      "answerable": true,
+      "refused": true,
+      "refusal_reason": "insufficient_evidence",
+      "attempts": 1,
+      "cited_ids": [],
+      "cited_page_hit": null,
+      "faithful": null,
+      "unsupported_claims": []
+    },
+    {
+      "id": "h02",
+      "answerable": true,
+      "refused": true,
+      "refusal_reason": "insufficient_evidence",
+      "attempts": 1,
+      "cited_ids": [],
+      "cited_page_hit": null,
+      "faithful": null,
+      "unsupported_claims": []
+    },
+    {
+      "id": "h03",
+      "answerable": true,
+      "refused": false,
+      "refusal_reason": null,
+      "attempts": 1,
+      "cited_ids": [
+        "async.md::0001",
+        "async.md::0023"
+      ],
+      "cited_page_hit": true,
+      "faithful": null,
+      "unsupported_claims": []
+    },
+    {
+      "id": "h04",
+      "answerable": true,
+      "refused": false,
+      "refusal_reason": null,
+      "attempts": 1,
+      "cited_ids": [
+        "tutorial/handling-errors.md::0009"
+      ],
+      "cited_page_hit": true,
+      "faithful": null,
+      "unsupported_claims": []
+    },
+    {
+      "id": "h05",
+      "answerable": true,
+      "refused": false,
+      "refusal_reason": null,
+      "attempts": 1,
+      "cited_ids": [
+        "tutorial/header-params.md::0002",
+        "tutorial/header-params.md::0003"
+      ],
+      "cited_page_hit": true,
+      "faithful": null,
+      "unsupported_claims": []
+    },
+    {
+      "id": "h06",
+      "answerable": true,
+      "refused": false,
+      "refusal_reason": null,
+      "attempts": 1,
+      "cited_ids": [
+        "tutorial/cookie-params.md::0001",
+        "tutorial/cookie-params.md::0002"
+      ],
+      "cited_page_hit": true,
+      "faithful": null,
+      "unsupported_claims": []
+    },
+    {
+      "id": "h07",
+      "answerable": true,
+      "refused": false,
+      "refusal_reason": null,
+      "attempts": 1,
+      "cited_ids": [
+        "tutorial/metadata.md::0001"
+      ],
+      "cited_page_hit": true,
+      "faithful": null,
+      "unsupported_claims": []
+    },
+    {
+      "id": "h08",
+      "answerable": true,
+      "refused": false,
+      "refusal_reason": null,
+      "attempts": 1,
+      "cited_ids": [
+        "deployment/server-workers.md::0012"
+      ],
+      "cited_page_hit": true,
+      "faithful": null,
+      "unsupported_claims": []
+    }
+  ]
+}
