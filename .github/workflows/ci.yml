@@ -5,11 +5,41 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHONUTF8: "1"
+  FASTAPI_DOCS_SHA: 05e6df7e906c3decba377c37548019973f40bf15
+
 jobs:
   quality:
+    name: Lint, types, unit tests
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: hf-${{ runner.os }}-${{ hashFiles('uv.lock') }}
+      - run: uv sync --locked
+      - run: uv run ruff check .
+      - run: uv run mypy src
+      - run: uv run pytest -q
+
+  retrieval-gate:
+    name: Retrieval quality gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
     env:
-      PYTHONUTF8: "1"
       QDRANT_URL: http://localhost:6333
     services:
       qdrant:
@@ -18,34 +48,21 @@ jobs:
           - 6333:6333
     steps:
       - uses: actions/checkout@v4
-
       - uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
-
-      - run: uv sync --locked
-
-      - name: Lint, types, tests
-        run: |
-          uv run ruff check .
-          uv run mypy src
-          uv run pytest -q
-
-      - name: Fetch FastAPI at the pinned commit
-        run: |
-          git clone --filter=blob:none https://github.com/fastapi/fastapi data/raw/fastapi
-          git -C data/raw/fastapi checkout 05e6df7e906c3decba377c37548019973f40bf15
-
       - uses: actions/cache@v4
         with:
           path: ~/.cache/huggingface
           key: hf-${{ runner.os }}-${{ hashFiles('uv.lock') }}
-
+      - run: uv sync --locked
+      - name: Fetch FastAPI docs at the pinned commit
+        run: |
+          git clone --filter=blob:none https://github.com/fastapi/fastapi data/raw/fastapi
+          git -C data/raw/fastapi checkout "$FASTAPI_DOCS_SHA"
       - name: Wait for Qdrant
         run: curl --retry 20 --retry-delay 2 --retry-connrefused -sf http://localhost:6333/readyz
-
       - name: Index the corpus
         run: uv run python -m rag_project.indexing.pipeline
-
       - name: Retrieval quality gate
         run: uv run python scripts/ci_gate.py
