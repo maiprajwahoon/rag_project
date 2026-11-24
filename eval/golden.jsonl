@@ -1,4 +1,4 @@
-{"id": "q01", "question": "How do I make a query parameter required?", "pages": ["tutorial/query-params-str-validations.md"], "answerable": true}
+{"id": "q01", "question": "How do I make a query parameter required?", "pages": ["tutorial/query-params-str-validations.md", "tutorial/query-params.md"], "answerable": true}
 {"id": "q02", "question": "How do I set a maximum length on a query parameter?", "pages": ["tutorial/query-params-str-validations.md"], "answerable": true}
 {"id": "q03", "question": "How do I declare a path parameter?", "pages": ["tutorial/path-params.md"], "answerable": true}
 {"id": "q04", "question": "How do I receive a JSON request body?", "pages": ["tutorial/body.md"], "answerable": true}
