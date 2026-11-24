@@ -538,8 +538,8 @@ def _postprocess_section_chunks(
 
 def chunk_documents(
     docs: Sequence[Document],
-    max_tokens: int = 450,
-    overlap_tokens: int = 60,
+    max_tokens: int = 40,
+    overlap_tokens: int = 10,
     min_tokens: int = 30,
 ) -> list[Chunk]:
     """Chunk markdown documents into retrieval-ready Chunk objects.
